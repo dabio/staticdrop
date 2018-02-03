@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -36,5 +37,9 @@ func handleGET(w http.ResponseWriter, r *http.Request) {
 
 func handlePOST(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	// we need to put this into a queue here
+
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	log.Printf("%s", body)
 }
