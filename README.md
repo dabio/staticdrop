@@ -1,1 +1,1 @@
-# staticdrop [![buddy pipeline](https://app.buddy.works/dabio/staticdrop/pipelines/pipeline/124253/badge.svg?token=3c7f71eba8fb7030dfe11d2b0284ee4782104d4bb145a5ae0d2000ccad90b0e1 "buddy pipeline")](https://app.buddy.works/dabio/staticdrop/pipelines/pipeline/124253)
+# staticdrop [![buddy pipeline](https://app.buddy.works/dabio/staticdrop/pipelines/pipeline/124253/badge.svg?token=136fd3dff698543f294421936deaec04431a20a66f2764b104ad21018269f391 "buddy pipeline")](https://app.buddy.works/dabio/staticdrop/pipelines/pipeline/124253)
