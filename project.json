@@ -1,0 +1,9 @@
+{
+  "name": "staticdrop",
+  "description": "",
+  "runtime": "golang",
+  "memory": 128,
+  "timeout": 5,
+  "role": "arn:aws:iam::200885815221:role/staticdrop_lambda_function",
+  "environment": {}
+}

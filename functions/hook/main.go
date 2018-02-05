@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/apex/gateway"
 )
 
 const query = "challenge"
@@ -12,7 +14,7 @@ const query = "challenge"
 func main() {
 	addr := ":" + os.Getenv("PORT")
 	http.HandleFunc("/", handle)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	log.Fatal(gateway.ListenAndServe(addr, nil))
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
