@@ -1,0 +1,1 @@
+# staticdrop [![buddy pipeline](https://app.buddy.works/dbraband/staticdrop/pipelines/pipeline/124253/badge.svg?token=3c7f71eba8fb7030dfe11d2b0284ee4782104d4bb145a5ae0d2000ccad90b0e1 "buddy pipeline")](https://app.buddy.works/dbraband/staticdrop/pipelines/pipeline/124253)
