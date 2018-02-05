@@ -15,6 +15,10 @@ data "aws_region" "current" {
 
 data "aws_caller_identity" "current" {}
 
+locals {
+  hook_invoke_arn = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.apex_function_hook}/invocations"
+}
+
 resource "aws_api_gateway_rest_api" "hook" {
   name        = "staticdrop-hook"
   description = "Managed by Terraform"
@@ -37,7 +41,7 @@ resource "aws_api_gateway_integration" "hookroot" {
   http_method = "${aws_api_gateway_method.hookroot.http_method}"
 
   type = "AWS_PROXY"
-  uri  = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.apex_function_hook}/invocations"
+  uri  = "${local.hook_invoke_arn}"
 
   integration_http_method = "POST"
 }
@@ -62,7 +66,7 @@ resource "aws_api_gateway_integration" "hookpath" {
   http_method = "${aws_api_gateway_method.hookpath.http_method}"
 
   type = "AWS_PROXY"
-  uri  = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.apex_function_hook}/invocations"
+  uri  = "${local.hook_invoke_arn}"
 
   integration_http_method = "POST"
 }
