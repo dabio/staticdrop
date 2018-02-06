@@ -8,6 +8,18 @@ terraform {
 }
 
 variable "apex_function_hook" {}
+variable "apex_function_role" {}
+
+variable "apex_function_arns" {
+  type = "map"
+}
+
+variable "apex_function_names" {
+  type = "map"
+}
+
+variable "dropbox_app_key" {}
+variable "dropbox_app_secret" {}
 
 data "aws_region" "current" {
   current = true
@@ -79,6 +91,24 @@ resource "aws_api_gateway_deployment" "hook" {
 
   rest_api_id = "${aws_api_gateway_rest_api.hook.id}"
   stage_name  = "prod"
+}
+
+resource "aws_lambda_function" "hook" {
+  function_name = "${var.apex_function_names["hook"]}"
+
+  role    = "${var.apex_function_role}"
+  handler = "main"
+  runtime = "go1.x"
+  timeout = 5
+
+  environment {
+    variables {
+      APEX_FUNCTION_NAME   = "hook"
+      LAMBDA_FUNCTION_NAME = "${var.apex_function_names["hook"]}"
+      DROPBOX_APP_KEY      = "${var.dropbox_app_key}"
+      DROPBOX_APP_SECRET   = "${var.dropbox_app_secret}"
+    }
+  }
 }
 
 resource "aws_lambda_permission" "hook" {
