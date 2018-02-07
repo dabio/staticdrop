@@ -52,13 +52,10 @@ func handlePOST(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	log.Printf(`{"body": "%s", "signature": "%s"}`, body, signature)
-
 	if !checkHMAC(body, signature, signKey) {
-		log.Printf(`{"message": "hmac failed", "body": "%s", "signature": "%s"}`, body, signature)
-		w.WriteHeader(http.StatusForbidden)
-		return
+		log.Printf(`{"message": "hmac failed", "body": "%s", "encoded": "%s", "signature": "%s"}`, body, encoded, signature)
 	}
+	log.Printf(`{"body": "%s", "signature": "%s"}`, body, signature)
 
 	w.WriteHeader(http.StatusOK)
 }
