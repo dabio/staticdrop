@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,7 +12,12 @@ import (
 	"github.com/apex/gateway"
 )
 
-const query = "challenge"
+const (
+	challengeQuery  = "challenge"
+	signatureHeader = "X-Dropbox-Signature"
+)
+
+var signKey = []byte(os.Getenv("DROPBOX_APP_SECRET"))
 
 func main() {
 	addr := ":" + os.Getenv("PORT")
@@ -34,14 +42,30 @@ func handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGET(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(r.URL.Query().Get(query)))
+	w.Write([]byte(r.URL.Query().Get(challengeQuery)))
 }
 
 func handlePOST(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	encoded := r.Header.Get(signatureHeader)
+	signature, _ := hex.DecodeString(encoded)
 
 	body, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	log.Printf("%s", body)
+	if !checkHMAC(body, signature, signKey) {
+		log.Printf(`{"message": "hmac failed", "body": "%s", "encoded": "%s", "signature": "%s"}`, body, encoded, signature)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	log.Printf(`{"body": "%s"}`, body)
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func checkHMAC(message, messageHMAC, key []byte) bool {
+	h := hmac.New(sha256.New, key)
+	h.Write(message)
+	mac := h.Sum(nil)
+
+	return hmac.Equal(messageHMAC, mac)
 }

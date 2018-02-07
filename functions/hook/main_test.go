@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -21,7 +22,7 @@ func TestGet(t *testing.T) {
 	}
 
 	for _, challenge := range challenges {
-		url = fmt.Sprintf("/?%s=%s", query, challenge)
+		url = fmt.Sprintf("/?%s=%s", challengeQuery, challenge)
 
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", url, nil)
@@ -32,11 +33,25 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestPost(t *testing.T) {
+func TestPostNothing(t *testing.T) {
 	t.Parallel()
 
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/", nil)
+	handle(rec, req)
+
+	equals(t, 403, rec.Code)
+}
+
+func TestPostSignature(t *testing.T) {
+	t.Parallel()
+
+	body := `{"list_folder": {"accounts": ["dbid:AADuYvHN_tjvjM4JyjA70vGwIMNau360Mbo"]}, "delta": {"users": [787701]}}`
+	signature := "a2f62303570360415ffb6cd3ddc2e39500b59ee0ae684df0a1de8630d555d2d0"
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/", strings.NewReader(body))
+	req.Header.Add(signatureHeader, signature)
 	handle(rec, req)
 
 	equals(t, 200, rec.Code)
