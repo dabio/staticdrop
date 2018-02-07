@@ -27,10 +27,6 @@ data "aws_region" "current" {
 
 data "aws_caller_identity" "current" {}
 
-locals {
-  hook_invoke_arn = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.apex_function_hook}/invocations"
-}
-
 resource "aws_api_gateway_rest_api" "hook" {
   name        = "staticdrop-hook"
   description = "Managed by Terraform"
@@ -53,7 +49,7 @@ resource "aws_api_gateway_integration" "hookroot" {
   http_method = "${aws_api_gateway_method.hookroot.http_method}"
 
   type = "AWS_PROXY"
-  uri  = "${local.hook_invoke_arn}"
+  uri  = "${module.lambda_hook.invoke_arn}"
 
   integration_http_method = "POST"
 }
@@ -78,7 +74,7 @@ resource "aws_api_gateway_integration" "hookpath" {
   http_method = "${aws_api_gateway_method.hookpath.http_method}"
 
   type = "AWS_PROXY"
-  uri  = "${local.hook_invoke_arn}"
+  uri  = "${module.lambda_hook.invoke_arn}"
 
   integration_http_method = "POST"
 }
@@ -93,29 +89,24 @@ resource "aws_api_gateway_deployment" "hook" {
   stage_name  = "prod"
 }
 
-resource "aws_lambda_function" "hook" {
-  function_name = "${var.apex_function_names["hook"]}"
-
+module "lambda_hook" {
+  source  = "./lambda"
+  name    = "${var.apex_function_names["hook"]}"
   role    = "${var.apex_function_role}"
   handler = "main"
   runtime = "go1.x"
   timeout = 5
 
   environment {
-    variables {
-      APEX_FUNCTION_NAME   = "hook"
-      LAMBDA_FUNCTION_NAME = "${var.apex_function_names["hook"]}"
-      DROPBOX_APP_KEY      = "${var.dropbox_app_key}"
-      DROPBOX_APP_SECRET   = "${var.dropbox_app_secret}"
-    }
+    APEX_FUNCTION_NAME   = "hook"
+    LAMBDA_FUNCTION_NAME = "${var.apex_function_names["hook"]}"
+    DROPBOX_APP_KEY      = "${var.dropbox_app_key}"
+    DROPBOX_APP_SECRET   = "${var.dropbox_app_secret}"
   }
-}
 
-resource "aws_lambda_permission" "hook" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = "${var.apex_function_hook}"
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.hook.id}/*"
+  permission {
+    statement_id = "AllowExecutionFromAPIGateway"
+    principal    = "apigateway.amazonaws.com"
+    source_arn   = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.hook.id}/*"
+  }
 }
