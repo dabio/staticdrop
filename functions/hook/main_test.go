@@ -25,8 +25,7 @@ func TestGet(t *testing.T) {
 		url = fmt.Sprintf("/?%s=%s", challengeQuery, challenge)
 
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", url, nil)
-		handle(rec, req)
+		handle(rec, httptest.NewRequest("GET", url, nil))
 
 		equals(t, 200, rec.Code)
 		equals(t, challenge, rec.Body.String())
@@ -37,8 +36,7 @@ func TestPostNothing(t *testing.T) {
 	t.Parallel()
 
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/", nil)
-	handle(rec, req)
+	handle(rec, httptest.NewRequest("POST", "/", nil))
 
 	equals(t, 403, rec.Code)
 }
@@ -64,8 +62,7 @@ func Test404(t *testing.T) {
 
 	for _, path := range paths {
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", path, nil)
-		handle(rec, req)
+		handle(rec, httptest.NewRequest("GET", path, nil))
 
 		equals(t, 404, rec.Code)
 	}
@@ -78,8 +75,7 @@ func TestNotAllowed(t *testing.T) {
 
 	for _, method := range methods {
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest(method, "/", nil)
-		handle(rec, req)
+		handle(rec, httptest.NewRequest(method, "/", nil))
 
 		equals(t, 405, rec.Code)
 	}
