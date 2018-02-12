@@ -1,0 +1,25 @@
+{
+  "entries": [
+    {
+      ".tag": "folder",
+      "name": "staticdrop",
+      "path_lower": "/staticdrop",
+      "path_display": "/staticdrop",
+      "id": "id:f1f9321c-2c9c-4b86-904b-1b11db303a18"
+    },
+    {
+      ".tag": "file",
+      "name": "moving_cli.png",
+      "path_lower": "/staticdrop/moving_cli.png",
+      "path_display": "/staticdrop/moving_cli.png",
+      "id": "id:878fc37b-2b70-488c-ab02-fb5d01b179ec",
+      "client_modified": "2018-02-07T08:45:34Z",
+      "server_modified": "2018-02-07T08:45:35Z",
+      "rev": "28c2ab9d0",
+      "size": 50647,
+      "content_hash": "424da3cf0c0b67fb71ab74ab7a8e4ad622a5d363a6637af79b64dd769fccecd8"
+    }
+  ],
+  "cursor": "fcce3e7dc8d3",
+  "has_more": false
+}
