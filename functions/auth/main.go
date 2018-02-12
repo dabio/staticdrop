@@ -1,16 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/dabio/staticdrop/oauth2"
 )
 
-const codeParam = "code"
-
-// this is a variable so we can overwrite this in our test
-var tokenAPI = "https://api.dropboxapi.com/oauth2/token"
+const (
+	codeParam = "code"
+	tokenURL  = "https://api.dropboxapi.com/oauth2/token"
+	authURL   = "https://www.dropbox.com/oauth2/authorize"
+)
 
 func main() {
 	addr := ":" + os.Getenv("PORT")
@@ -31,26 +33,14 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	log.Printf(`{"code":"%s"}`, code)
-
-	// gather the bearer now
-	req, err := http.NewRequest(
-		http.MethodPost,
-		fmt.Sprintf("%s?code=%s&grant_type=authorization_code", tokenAPI, code),
-		nil,
-	)
-	if err != nil {
-		log.Printf(`{
-			"message":"cannot connect gather bearer from dropbox",
-			"error":"%s"
-		}`, err)
-		return
+	config := &oauth2.Config{
+		ClientID:     os.Getenv("DROPBOX_API_KEY"),
+		ClientSecret: os.Getenv("DROPBOX_API_SECRET"),
+		RedirectURL:  "http://localhost:3000",
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
+		},
 	}
-
-	req.SetBasicAuth(os.Getenv("DROPBOX_API_KEY"), os.Getenv("DROPBOX_API_SECRET"))
-
-	log.Print(tokenAPI)
-	w.Write([]byte(tokenAPI))
-	w.Write([]byte("https://www.dropbox.com/oauth2/authorize?client_id=" + os.Getenv("DROPBOX_APP_KEY") + "&response_type=code&redirect_uri=http://localhost:3000"))
+	w.Write([]byte(config.AuthCodeURL()))
 }
