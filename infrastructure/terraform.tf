@@ -21,19 +21,27 @@ variable "apex_function_names" {
 variable "dropbox_app_key" {}
 variable "dropbox_app_secret" {}
 
-data "aws_region" "current" {
-  current = true
-}
-
+data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
+
+resource "aws_api_gateway_rest_api" "main" {
+  name        = "staticdrop"
+  description = "Managed by Terraform"
+
+  binary_media_types = [
+    "*/*",
+  ]
+}
 
 module "api_hook" {
   source = "./api"
-  name   = "${var.apex_function_names["hook"]}"
 
-  stages = [
-    "prod",
-  ]
+  // is actually: "/hook"
+  path_part   = "hook"
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
+  methods     = ["GET", "POST"]
+  stages      = ["prod"]
 
   integration_uri = "${module.lambda_hook.invoke_arn}"
 }
@@ -56,6 +64,6 @@ module "lambda_hook" {
   permission {
     statement_id = "AllowExecutionFromAPIGateway"
     principal    = "apigateway.amazonaws.com"
-    source_arn   = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${module.api_hook.id}/*"
+    source_arn   = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.main.id}/*"
   }
 }

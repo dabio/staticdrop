@@ -26,11 +26,6 @@ func main() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
 	switch r.Method {
 	case http.MethodGet:
 		handleGET(w, r)

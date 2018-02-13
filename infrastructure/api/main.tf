@@ -1,5 +1,20 @@
-variable "name" {
-  description = "API Gateway name"
+variable "rest_api_id" {
+  description = "API Gateway ID"
+}
+
+variable "parent_id" {
+  description = "API Gateway Parent ID"
+}
+
+variable "path_part" {
+  description = "API Gateway path"
+}
+
+variable "methods" {
+  description = "API Gateway endoint methods"
+
+  type    = "list"
+  default = ["ANY"]
 }
 
 variable "integration_uri" {
@@ -13,70 +28,42 @@ variable "stages" {
   default = ["prod"]
 }
 
-output "id" {
-  value = "${aws_api_gateway_rest_api.main.id}"
-}
+resource "aws_api_gateway_resource" "main" {
+  count = "${length(var.path_part) > 0 ? 1 : 0}"
 
-resource "aws_api_gateway_rest_api" "main" {
-  name        = "${var.name}"
-  description = "Managed by Terraform"
-
-  binary_media_types = [
-    "*/*",
-  ]
+  path_part   = "${var.path_part}"
+  parent_id   = "${var.parent_id}"
+  rest_api_id = "${var.rest_api_id}"
 }
 
 resource "aws_api_gateway_method" "main" {
-  rest_api_id   = "${aws_api_gateway_rest_api.main.id}"
-  resource_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
-  http_method   = "ANY"
+  count = "${length(var.methods)}"
+
+  rest_api_id   = "${var.rest_api_id}"
+  resource_id   = "${aws_api_gateway_resource.main.id}"
+  http_method   = "${element(var.methods, count.index)}"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "main" {
-  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
-  resource_id = "${aws_api_gateway_rest_api.main.root_resource_id}"
-  http_method = "${aws_api_gateway_method.main.http_method}"
+  count = "${length(var.methods)}"
 
-  type = "AWS_PROXY"
-  uri  = "${var.integration_uri}"
+  rest_api_id = "${var.rest_api_id}"
+  resource_id = "${aws_api_gateway_resource.main.id}"
+  http_method = "${aws_api_gateway_method.main.*.http_method[count.index]}"
 
-  integration_http_method = "POST"
-}
+  // http_method = "${element(var.methods, count.index)}"
 
-resource "aws_api_gateway_resource" "path" {
-  path_part = "{proxy+}"
-
-  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
-  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
-}
-
-resource "aws_api_gateway_method" "path" {
-  rest_api_id   = "${aws_api_gateway_rest_api.main.id}"
-  resource_id   = "${aws_api_gateway_resource.path.id}"
-  http_method   = "ANY"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "path" {
-  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
-  resource_id = "${aws_api_gateway_resource.path.id}"
-  http_method = "${aws_api_gateway_method.path.http_method}"
-
-  type = "AWS_PROXY"
-  uri  = "${var.integration_uri}"
-
+  type                    = "AWS_PROXY"
+  uri                     = "${var.integration_uri}"
   integration_http_method = "POST"
 }
 
 resource "aws_api_gateway_deployment" "hook" {
   count = "${length(var.stages)}"
 
-  depends_on = [
-    "aws_api_gateway_integration.main",
-    "aws_api_gateway_integration.path",
-  ]
+  depends_on = ["aws_api_gateway_integration.main"]
 
-  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  rest_api_id = "${var.rest_api_id}"
   stage_name  = "${element(var.stages, count.index)}"
 }
