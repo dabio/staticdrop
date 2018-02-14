@@ -20,9 +20,37 @@ variable "apex_function_names" {
 
 variable "dropbox_app_key" {}
 variable "dropbox_app_secret" {}
+variable "rds_root_username" {}
+variable "rds_root_password" {}
 
 data "aws_region" "current" {}
+
 data "aws_caller_identity" "current" {}
+
+resource "aws_ssm_parameter" "rds_root_username" {
+  name  = "/prod/rds/postgres-micro/username"
+  value = "${var.rds_root_username}"
+  type  = "SecureString"
+}
+
+resource "aws_ssm_parameter" "rds_root_password" {
+  name  = "/prod/rds/postgres-micro/password"
+  value = "${var.rds_root_password}"
+  type  = "SecureString"
+}
+
+resource "aws_db_instance" "main" {
+  allocated_storage       = 20
+  backup_retention_period = 7
+  db_subnet_group_name    = "default"
+  engine                  = "postgres"
+  instance_class          = "db.t2.micro"
+  identifier              = "postgres-micro"
+  username                = "${aws_ssm_parameter.rds_root_username.value}"
+  password                = "${aws_ssm_parameter.rds_root_password.value}"
+  storage_type            = "gp2"
+  skip_final_snapshot     = true
+}
 
 resource "aws_api_gateway_rest_api" "main" {
   name        = "staticdrop"
