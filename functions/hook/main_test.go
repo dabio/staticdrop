@@ -55,19 +55,6 @@ func TestPostSignature(t *testing.T) {
 	equals(t, 200, rec.Code)
 }
 
-func Test404(t *testing.T) {
-	t.Parallel()
-
-	paths := []string{"/new", "/path", "/different/path"}
-
-	for _, path := range paths {
-		rec := httptest.NewRecorder()
-		handle(rec, httptest.NewRequest("GET", path, nil))
-
-		equals(t, 404, rec.Code)
-	}
-}
-
 func TestNotAllowed(t *testing.T) {
 	t.Parallel()
 

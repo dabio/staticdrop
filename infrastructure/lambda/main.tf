@@ -56,9 +56,7 @@ resource "aws_lambda_function" "main" {
 }
 
 resource "aws_lambda_permission" "main" {
-  // careful with this. the source_arn needs to be created before, otherwise
-  // this won't work.
-  count = "${length(var.permission) > 0 ? 1 : 0}"
+  // careful with this. the source_arn needs to be created before, otherwise  // this won't work.  // count = "${length(var.permission) > 0 ? 1 : 0}"
 
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.main.arn}"
