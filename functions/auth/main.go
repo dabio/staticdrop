@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/apex/gateway"
 	"github.com/dabio/staticdrop/oauth2"
 )
 
@@ -20,7 +21,7 @@ const (
 func main() {
 	addr := ":" + os.Getenv("PORT")
 	http.HandleFunc("/", handle)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	log.Fatal(gateway.ListenAndServe(addr, nil))
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -45,5 +46,16 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, config.AuthCodeURL(), http.StatusSeeOther)
 		return
 	}
-	w.Write([]byte(config.AuthCodeURL()))
+
+	w.WriteHeader(http.StatusOK)
+	log.Printf(`{"message":"exchange code", "code": "%s"}`, code)
+
+	defer func() {
+		token, err := config.Exchange(code)
+		if err != nil {
+			log.Printf(`{"message":"error getting token", "error": "%s"}`, err)
+		}
+
+		log.Printf(`{"message":"got the token", "token": "%s", "type": "%s"}`, token.AccessToken, token.TokenType)
+	}()
 }
