@@ -61,6 +61,9 @@ resource "aws_api_gateway_rest_api" "main" {
   ]
 }
 
+/*
+ * HOOK
+ */
 module "api_hook" {
   source = "./api"
 
@@ -85,6 +88,44 @@ module "lambda_hook" {
   environment {
     APEX_FUNCTION_NAME   = "hook"
     LAMBDA_FUNCTION_NAME = "${var.apex_function_names["hook"]}"
+    DROPBOX_APP_KEY      = "${var.dropbox_app_key}"
+    DROPBOX_APP_SECRET   = "${var.dropbox_app_secret}"
+  }
+
+  permission {
+    statement_id = "AllowExecutionFromAPIGateway"
+    principal    = "apigateway.amazonaws.com"
+    source_arn   = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.main.id}/*"
+  }
+}
+
+/*
+ * AUTH
+ */
+module "api_auth" {
+  source = "./api"
+
+  // is actually: "/hook"
+  path_part   = "auth"
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
+  methods     = ["GET"]
+  stages      = ["prod"]
+
+  integration_uri = "${module.lambda_auth.invoke_arn}"
+}
+
+module "lambda_auth" {
+  source  = "./lambda"
+  name    = "${var.apex_function_names["auth"]}"
+  role    = "${var.apex_function_role}"
+  handler = "main"
+  runtime = "go1.x"
+  timeout = 5
+
+  environment {
+    APEX_FUNCTION_NAME   = "auth"
+    LAMBDA_FUNCTION_NAME = "${var.apex_function_names["auth"]}"
     DROPBOX_APP_KEY      = "${var.dropbox_app_key}"
     DROPBOX_APP_SECRET   = "${var.dropbox_app_secret}"
   }

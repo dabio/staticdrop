@@ -59,7 +59,7 @@ resource "aws_api_gateway_integration" "main" {
   integration_http_method = "POST"
 }
 
-resource "aws_api_gateway_deployment" "hook" {
+resource "aws_api_gateway_deployment" "main" {
   count = "${length(var.stages)}"
 
   depends_on = ["aws_api_gateway_integration.main"]

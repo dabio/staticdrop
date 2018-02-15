@@ -31,8 +31,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	config := &oauth2.Config{
-		ClientID:     os.Getenv("DROPBOX_API_KEY"),
-		ClientSecret: os.Getenv("DROPBOX_API_SECRET"),
+		ClientID:     os.Getenv("DROPBOX_APP_KEY"),
+		ClientSecret: os.Getenv("DROPBOX_APP_SECRET"),
 		RedirectURL:  fmt.Sprintf("%s://%s%s", scheme, r.Host, r.URL.String()),
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  authURL,
