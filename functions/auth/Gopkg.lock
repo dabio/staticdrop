@@ -19,6 +19,12 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "oauth"
+  name = "github.com/dabio/staticdrop"
+  packages = ["oauth2"]
+  revision = "65e8f6609443f193c67b021820de22f3b09fedd8"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -27,6 +33,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "887029433976759b80abe7a5c31ed08b81b3bdbc033a7ea76aa088391bfa670c"
+  inputs-digest = "c5b993914a8716a0788f134879565e1591e9cceca33717152ce2fa52be2cf417"
   solver-name = "gps-cdcl"
   solver-version = 1

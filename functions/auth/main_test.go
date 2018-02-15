@@ -9,19 +9,13 @@ import (
 	"testing"
 )
 
-func TestGetNotFound(t *testing.T) {
+func TestRedirect(t *testing.T) {
 	t.Parallel()
 
 	rec := httptest.NewRecorder()
+	handle(rec, httptest.NewRequest("GET", "/", nil))
 
-	handle(rec, httptest.NewRequest("GET", "/blah", nil))
-	equals(t, 404, rec.Code)
-
-	handle(rec, httptest.NewRequest("POST", "/", nil))
-	equals(t, 404, rec.Code)
-
-	handle(rec, httptest.NewRequest("DELETE", "/", nil))
-	equals(t, 404, rec.Code)
+	equals(t, 303, rec.Code)
 }
 
 // equals fails the test if exp is not equal to act.
