@@ -33,7 +33,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	config := &oauth2.Config{
 		ClientID:     os.Getenv("DROPBOX_APP_KEY"),
 		ClientSecret: os.Getenv("DROPBOX_APP_SECRET"),
-		RedirectURL:  fmt.Sprintf("%s://%s%s", scheme, r.Host, r.URL.String()),
+		RedirectURL:  fmt.Sprintf("%s://%s%s", scheme, r.Host, r.URL.Path),
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  authURL,
 			TokenURL: tokenURL,

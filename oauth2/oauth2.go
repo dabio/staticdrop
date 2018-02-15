@@ -48,7 +48,7 @@ func (c *Config) AuthCodeURL() string {
 // Exchange converts an authorization code into a token.
 func (c *Config) Exchange(code string) (*Token, error) {
 	v := url.Values{
-		"grand_type": {"authorization_code"},
+		"grant_type": {"authorization_code"},
 		"code":       {code},
 	}
 	if c.RedirectURL != "" {
