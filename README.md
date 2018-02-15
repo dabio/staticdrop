@@ -1,1 +1,1 @@
-# staticdrop [![buddy pipeline](https://app.buddy.works/dabio/staticdrop/pipelines/pipeline/124253/badge.svg?token=136fd3dff698543f294421936deaec04431a20a66f2764b104ad21018269f391 "buddy pipeline")](https://app.buddy.works/dabio/staticdrop/pipelines/pipeline/124253)
+# staticdrop [![Build Status](https://semaphoreci.com/api/v1/dabio/staticdrop/branches/master/badge.svg)](https://semaphoreci.com/dabio/staticdrop)
