@@ -3,6 +3,9 @@ package oauth2
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -79,14 +82,14 @@ func (t *Token) SetAuthHeader(r *http.Request) {
 	r.Header.Set("Authorization", t.Type()+" "+t.AccessToken)
 }
 
-func retrieveToken(c *Config, v url.Values) (token *Token, err error) {
+func retrieveToken(c *Config, v url.Values) (*Token, error) {
 	req, err := http.NewRequest(
 		http.MethodPost,
 		c.Endpoint.TokenURL,
 		strings.NewReader(v.Encode()),
 	)
 	if err != nil {
-		return
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -95,10 +98,36 @@ func retrieveToken(c *Config, v url.Values) (token *Token, err error) {
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer res.Body.Close()
+	body, err := ioutil.ReadAll(io.LimitReader(res.Body, 1<<20))
+	if err != nil {
+		return nil, err
+	}
+	if code := res.StatusCode; code < 200 || code > 299 {
+		return nil, &RetrieveError{
+			Response: res,
+			Body:     body,
+		}
+	}
 
-	err = json.NewDecoder(res.Body).Decode(&token)
-	return
+	var token Token
+	if err := json.Unmarshal(body, &token); err != nil {
+		return nil, err
+	}
+
+	return &token, nil
+}
+
+// RetrieveError contains information about server errors while retrieving
+// the token from a backend.
+type RetrieveError struct {
+	Response *http.Response
+	Body     []byte
+}
+
+// Returns a string with the error response.
+func (r *RetrieveError) Error() string {
+	return fmt.Sprintf("oauth2: cannot fetch token: %v\nResponse: %s", r.Response.Status, r.Body)
 }

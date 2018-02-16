@@ -54,8 +54,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		token, err := config.Exchange(code)
 		if err != nil {
 			log.Printf(`{"message":"error getting token", "error": "%s"}`, err)
+		} else {
+			log.Printf(`{"message":"got the token", "token": "%s", "type": "%s"}`, token.AccessToken, token.TokenType)
 		}
-
-		log.Printf(`{"message":"got the token", "token": "%s", "type": "%s"}`, token.AccessToken, token.TokenType)
 	}()
 }

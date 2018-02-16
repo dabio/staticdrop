@@ -69,6 +69,28 @@ func TestExchangeCode2Token(t *testing.T) {
 	equals(t, "bearer", token.Type())
 }
 
+func TestExchangeCodeRetrieveError(t *testing.T) {
+	t.Parallel()
+
+	const json = `{"error_description": "code doesn't exist or has expired", "error": "invalid_grant"}`
+	ts := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			equals(t, "POST", r.Method)
+			equals(t, r.Header.Get("Content-Type"), "application/x-www-form-urlencoded")
+			w.WriteHeader(400)
+			w.Write([]byte(json))
+		}),
+	)
+	defer ts.Close()
+
+	config := config(ts.URL)
+	_, err := config.Exchange("123456")
+
+	if err == nil {
+		t.Error("want RetrieveError")
+	}
+}
+
 // equals fails the test if exp is not equal to act
 func equals(tb testing.TB, exp, act interface{}) {
 	if !reflect.DeepEqual(exp, act) {
