@@ -44,7 +44,6 @@ func TestAuthCodeURL(t *testing.T) {
 	for _, test := range tests {
 		c := config(test.url)
 		equals(t, test.exp, c.AuthCodeURL())
-
 	}
 }
 

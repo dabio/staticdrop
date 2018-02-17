@@ -15,14 +15,14 @@
     "lambda/messages",
     "lambdacontext"
   ]
-  revision = "6e2e37798efbb1dfd8e9c6681702e683a6046517"
-  version = "v1.0.1"
+  revision = "fafa7e49388b8991caf99308e80655ba91816b72"
+  version = "v1.1.0"
 
 [[projects]]
-  branch = "oauth"
+  branch = "master"
   name = "github.com/dabio/staticdrop"
   packages = ["oauth2"]
-  revision = "65e8f6609443f193c67b021820de22f3b09fedd8"
+  revision = "87e8a524b2dbb22ec372f06abf49fdff4d1ba351"
 
 [[projects]]
   name = "github.com/pkg/errors"
